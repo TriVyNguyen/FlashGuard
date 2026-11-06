@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FlashGuard — Flash Sale Concurrency Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+    <div class="brand">
+        <span class="logo">⚡</span>
+        <div>
+            <h1>FlashGuard</h1>
+            <p>Mô phỏng Flash Sale &amp; kiểm tra chống bán vượt (overselling)</p>
+        </div>
+    </div>
+    <nav>
+        <a href="/swagger-ui.html" target="_blank" rel="noopener">Swagger API</a>
+    </nav>
+</header>
+
+<main class="layout">
+    <!-- Cột trái: tạo dữ liệu -->
+    <aside class="col-left">
+        <section class="card">
+            <h2>1. Tạo sản phẩm</h2>
+            <form id="productForm" class="form">
+                <label>Tên sản phẩm
+                    <input name="name" required maxlength="200" value="iPhone 17 Pro 256GB">
+                </label>
+                <div class="row">
+                    <label>Giá gốc (đ)
+                        <input name="originalPrice" type="number" min="1" step="1000" required value="30000000">
+                    </label>
+                    <label>Tồn kho
+                        <input name="stockQuantity" type="number" min="0" required value="50">
+                    </label>
+                </div>
+                <button type="submit" class="btn primary">Tạo sản phẩm</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>2. Tạo Flash Sale</h2>
+            <form id="flashSaleForm" class="form">
+                <label>Sản phẩm
+                    <select name="productId" id="productSelect" required></select>
+                </label>
+                <div class="row">
+                    <label>Giá sale (đ)
+                        <input name="salePrice" type="number" min="1" step="1000" required value="19990000">
+                    </label>
+                    <label>Số lượng sale
+                        <input name="saleQuantity" type="number" min="1" required value="10">
+                    </label>
+                </div>
+                <div class="row">
+                    <label>Bắt đầu
+                        <input name="startTime" type="datetime-local" step="1" required>
+                    </label>
+                    <label>Kết thúc
+                        <input name="endTime" type="datetime-local" step="1" required>
+                    </label>
+                </div>
+                <label>Trạng thái
+                    <select name="status">
+                        <option value="ACTIVE">ACTIVE — mở bán</option>
+                        <option value="INACTIVE">INACTIVE — tạm dừng</option>
+                    </select>
+                </label>
+                <button type="submit" class="btn primary">Tạo Flash Sale</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Flash Sale</h2>
+            <ul id="flashSaleList" class="fs-list"><li class="muted">Chưa có Flash Sale nào</li></ul>
+        </section>
+    </aside>
+
+    <!-- Cột phải: chi tiết + thao tác -->
+    <section class="col-main">
+        <div id="emptyState" class="card empty">
+            <p>Tạo sản phẩm và Flash Sale ở bên trái, rồi chọn một Flash Sale để đặt hàng và mô phỏng nhiều người mua cùng lúc.</p>
+        </div>
+
+        <div id="detail" hidden>
+            <section class="card">
+                <div class="detail-head">
+                    <div>
+                        <h2 id="dTitle"></h2>
+                        <p class="muted" id="dMeta"></p>
+                    </div>
+                    <span id="dPhase" class="badge"></span>
+                </div>
+
+                <div class="stock-bar" aria-label="Phân bổ số lượng Flash Sale">
+                    <div id="barSold" class="seg sold"></div>
+                    <div id="barReserved" class="seg reserved"></div>
+                    <div id="barAvailable" class="seg available"></div>
+                </div>
+                <div class="stats">
+                    <div class="stat"><span class="dot sold"></span><b id="sSold">0</b><small>Đã bán</small></div>
+                    <div class="stat"><span class="dot reserved"></span><b id="sReserved">0</b><small>Đang giữ</small></div>
+                    <div class="stat"><span class="dot available"></span><b id="sAvailable">0</b><small>Còn lại</small></div>
+                    <div class="stat"><b id="sTotal">0</b><small>Số lượng sale</small></div>
+                    <div class="stat"><b id="sRevenue">0</b><small>Doanh thu</small></div>
+                </div>
+                <p id="dConsistency" class="consistency"></p>
+                <p class="formula">Available = Sale Quantity − Reserved − Sold</p>
+            </section>
+
+            <div class="grid-2">
+                <section class="card">
+                    <h2>3. Đặt hàng</h2>
+                    <form id="orderForm" class="form">
+                        <div class="row">
+                            <label>Số lượng
+                                <input name="quantity" type="number" min="1" value="1" required>
+                            </label>
+                            <label>Giữ hàng (giây)
+                                <input name="holdSeconds" type="number" min="1" placeholder="mặc định 300">
+                            </label>
+                        </div>
+                        <label>Idempotency-Key
+                            <div class="input-group">
+                                <input name="idempotencyKey" id="idemKey" required maxlength="100">
+                                <button type="button" class="btn ghost" id="newKeyBtn" title="Tạo khóa mới">↻</button>
+                            </div>
+                        </label>
+                        <p class="hint">Gửi lại cùng một khóa sẽ nhận lại đơn cũ, không tạo đơn trùng.</p>
+                        <button type="submit" class="btn primary">Đặt hàng</button>
+                    </form>
+                </section>
+
+                <section class="card">
+                    <h2>4. Mô phỏng nhiều người mua cùng lúc</h2>
+                    <form id="simForm" class="form">
+                        <div class="row">
+                            <label>Số người mua
+                                <input name="buyers" type="number" min="1" max="1000" value="100" required>
+                            </label>
+                            <label>Mỗi người mua
+                                <input name="qty" type="number" min="1" value="1" required>
+                            </label>
+                        </div>
+                        <p class="hint">Trình duyệt bắn đồng loạt các request, mỗi request một Idempotency-Key riêng.</p>
+                        <button type="submit" class="btn danger" id="simBtn">Bắt đầu Flash Sale!</button>
+                    </form>
+                    <div id="simResult" class="sim-result" hidden></div>
+                </section>
+            </div>
+
+            <section class="card">
+                <div class="detail-head">
+                    <h2>Đơn hàng</h2>
+                    <button class="btn ghost" id="refreshBtn">Làm mới</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr><th>#</th><th>SL</th><th>Tổng tiền</th><th>Trạng thái</th><th>Hết hạn lúc</th><th>Idempotency-Key</th><th></th></tr>
+                        </thead>
+                        <tbody id="orderRows"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <section class="card">
+            <h2>Nhật ký API</h2>
+            <ol id="log" class="log"></ol>
+        </section>
+    </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>

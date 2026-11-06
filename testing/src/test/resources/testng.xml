@@ -1,0 +1,38 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="FlashGuard Test Suite" verbose="1">
+    <listeners>
+        <listener class-name="com.flashguard.tests.listener.ConsoleReportListener"/>
+    </listeners>
+
+    <test name="Validation">
+        <classes>
+            <class name="com.flashguard.tests.product.ProductValidationTest"/>
+            <class name="com.flashguard.tests.flashsale.FlashSaleValidationTest"/>
+        </classes>
+    </test>
+    <test name="Order">
+        <classes>
+            <class name="com.flashguard.tests.order.OrderTest"/>
+        </classes>
+    </test>
+    <test name="Payment">
+        <classes>
+            <class name="com.flashguard.tests.payment.PaymentTest"/>
+        </classes>
+    </test>
+    <test name="Idempotency">
+        <classes>
+            <class name="com.flashguard.tests.idempotency.IdempotencyTest"/>
+        </classes>
+    </test>
+    <test name="Concurrency">
+        <classes>
+            <class name="com.flashguard.tests.concurrency.OversellingConcurrencyTest"/>
+        </classes>
+    </test>
+    <test name="Inventory">
+        <classes>
+            <class name="com.flashguard.tests.inventory.InventoryTest"/>
+        </classes>
+    </test>
+</suite>
