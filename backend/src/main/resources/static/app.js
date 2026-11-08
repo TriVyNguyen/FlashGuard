@@ -277,6 +277,19 @@ $('#simForm').addEventListener('submit', async (e) => {
 
 $('#refreshBtn').addEventListener('click', refreshDetail);
 
+// ---------- Làm mới dữ liệu demo ----------
+$('#resetBtn').addEventListener('click', async () => {
+    if (!confirm('Xóa TOÀN BỘ sản phẩm, Flash Sale, đơn hàng hiện có và tạo lại 2 đợt mẫu?')) return;
+    const res = await api('POST', '/api/demo/reset');
+    if (!res.ok) return toast(errorText(res), true);
+    toast(`Đã xóa ${res.data.flashSales} Flash Sale, ${res.data.orders} đơn và tạo lại 2 đợt mẫu`);
+    selectedId = null;
+    $('#detail').hidden = true;
+    $('#emptyState').hidden = false;
+    await loadProducts();
+    await loadFlashSales();
+});
+
 // ---------- Khởi động ----------
 (function init() {
     const now = new Date();

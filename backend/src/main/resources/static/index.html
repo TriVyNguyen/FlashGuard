@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FlashGuard — Flash Sale Concurrency Demo</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- ?v=... : đổi số khi sửa file để trình duyệt không dùng bản cũ trong cache -->
+    <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 <header class="topbar">
@@ -16,6 +17,7 @@
         </div>
     </div>
     <nav>
+        <button type="button" class="btn ghost" id="resetBtn" title="Xóa toàn bộ dữ liệu, tạo lại 2 đợt Flash Sale mẫu">Làm mới dữ liệu demo</button>
         <a href="/swagger-ui.html" target="_blank" rel="noopener">Swagger API</a>
     </nav>
 </header>
@@ -55,7 +57,7 @@
                         <input name="saleQuantity" type="number" min="1" required value="10">
                     </label>
                 </div>
-                <div class="row">
+                <div class="row stack">
                     <label>Bắt đầu
                         <input name="startTime" type="datetime-local" step="1" required>
                     </label>
@@ -176,6 +178,6 @@
 </main>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="app.js"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

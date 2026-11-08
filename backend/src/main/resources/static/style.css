@@ -44,11 +44,13 @@ p { margin: 0; }
     width: 38px; height: 38px;
     background: #fff3d6; border-radius: 9px; font-size: 20px;
 }
+.topbar nav { display: flex; align-items: center; gap: 16px; }
 .topbar a { color: var(--primary); text-decoration: none; font-weight: 500; }
 
 .layout {
     display: grid;
-    grid-template-columns: 340px 1fr;
+    /* Cột trái rộng 400–480px để 2 ô cạnh nhau vẫn thoải mái; phần còn lại cho cột chi tiết */
+    grid-template-columns: minmax(400px, 480px) 1fr;
     gap: 16px;
     padding: 16px 24px 40px;
     max-width: 1400px;
@@ -68,18 +70,22 @@ p { margin: 0; }
 @media (max-width: 1100px) { .grid-2 { grid-template-columns: 1fr; } }
 
 .form { display: flex; flex-direction: column; gap: 10px; }
-.form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 500; flex: 1; }
+/* min-width: 0 cho phép label co lại; nếu thiếu, ô input giữ bề rộng mặc định và tràn khỏi card */
+.form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 500; flex: 1; min-width: 0; }
 .row { display: flex; gap: 10px; }
+.row.stack { flex-direction: column; }
 input, select {
     font: inherit; color: var(--text);
     padding: 7px 9px;
     border: 1px solid var(--border);
     border-radius: 7px;
     background: #fff;
+    width: 100%;
     min-width: 0;
 }
 input:focus, select:focus { outline: 2px solid #c9d5ff; border-color: var(--primary); }
 .input-group { display: flex; gap: 6px; }
+.input-group .btn { flex: none; }
 .input-group input { flex: 1; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
 .hint { font-size: 12px; color: var(--muted); }
 
