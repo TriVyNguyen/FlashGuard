@@ -28,6 +28,8 @@
     <test name="Concurrency">
         <classes>
             <class name="com.flashguard.tests.concurrency.OversellingConcurrencyTest"/>
+            <!-- Cùng kịch bản 100/10 nhưng để TestNG tự tạo 100 người mua (invocationCount + threadPoolSize) -->
+            <class name="com.flashguard.tests.concurrency.TestNgInvocationConcurrencyTest"/>
         </classes>
     </test>
     <test name="Inventory">
